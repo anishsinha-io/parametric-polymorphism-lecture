@@ -1,0 +1,10 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "⚙️  Run Java example",
+      "type": "shell",
+      "command": "cd ${workspaceFolder}/java-interface-example && javac -d build Main.java && java -cp build Main"
+    }
+  ]
+}
