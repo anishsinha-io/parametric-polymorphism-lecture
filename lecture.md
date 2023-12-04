@@ -17,15 +17,24 @@ If you can drive one car, you can drive all of them. All cars expose the same _i
 
 However, the implementation of steering, reversing, and driving forward may differ across different car brands, makes, and models. For example, a Ferrari will probably have a much more fine tuned implementation for steering than a Chrysler. Although they expose the same _interface_, their _implementation details_ differ.
 
-Let's look at this in the context of a real programming language. Here is (a simplified version of) the List interface in Java which works with integers.
+Let's look at this in the context of a real programming language. Here is (a simplified version of) the List interface in Java which works with integers. A FULL example of this Java code can be found in the directory `java-interface-example`. If you are using VSCode or Neovim, you can simply run the "Run Java Example" task from your IDE. If not, you can manually invoke the following commands (in the context of the `java-interface-example` directory).
+
+- `java -d build Main.java`
+- `java -cp build Main`
 
 ```java
-public interface List {
-  void add(int);
-  void addAll(int[]);
-  void appendList(List);
-  int remove();
-  int length();
+interface List {
+  public void add(int data);
+
+  public String toString();
+
+  public void addAll(int[] data);
+
+  public void appendList(List list);
+
+  public int remove();
+
+  public int length();
 }
 ```
 
@@ -36,14 +45,20 @@ public class ArrayList implements List {
   int[] data;
   int length;
 
+  @Override
   public void add(int item) {
-    if(length == data.length) {
-      int[] newData = new int[data.length * 1.5];
-      System.arraycopy(arr1, 0, new_data, 0, arr1.length);
+    // If there's not enough space
+    if (length == data.length) {
+      // Reallocate the data
+      int[] newData = new int[(int) (data.length * 1.5)];
+      System.arraycopy(data, 0, newData, 0, data.length);
       data = newData;
     }
+    // Append the item to the end
+    data[length++] = item;
   }
-  // assume the other methods are implemented below...
+
+  // assume the other methods, constructors, etc., are implemented below...
 }
 
 public class LinkedList implements List {
@@ -62,20 +77,25 @@ public class LinkedList implements List {
   private ListNode head;
   private int length;
 
-  public void add(int item) {
-    ListNode newNode = new ListNode(item);
-    if(length == 0) {
+  @Override
+  public void add(int data) {
+    // Construct a new node
+    ListNode newNode = new ListNode(data);
+    if (head == null) {
       head = newNode;
     } else {
+      // iterate through the list
       ListNode iter = head;
-      while(iter != null) {
+      while (iter.next != null) {
         iter = iter.next;
       }
+      // ...and link the new node to the end
       iter.next = newNode;
       newNode.prev = iter;
     }
   }
-  // assume the other methods are implemented below
+
+  // assume the other methods, constructors, etc., are implemented below
 }
 ```
 
@@ -86,8 +106,8 @@ For example:
 ```java
 public class Main {
   public static void main(String[] args) {
-    ArrayList l1 = new ArrayList();
-    LinkedList l2 = new LinkedList();
+    List l1 = new ArrayList();
+    List l2 = new LinkedList();
 
     takesList(l1);
     takesList(l2);
@@ -108,50 +128,61 @@ Now lets discuss _parametric_ polymorphism. Parametric polymorphism allows a sin
 This definition is not particularly easy to understand, so let's look into an example of where this might be useful. What better place to start than a language _without_ parametric polymorphism: C. Let's look at the following implementation of a stack of integers.
 
 ```C
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+// An int stack frame contains a data field of type integer and a pointer to the
+// next stack frame
 typedef struct int_stack_frame {
-  struct stack_frame* next;
-  int data;
-} stack_frame;
+    int                     data;
+    struct int_stack_frame* next;
+} int_stack_frame;
+
+// Constructor for
+int_stack_frame* new_int_stack_frame(int data) {
+    int_stack_frame* sf = malloc(sizeof(int_stack_frame));
+    sf->data            = data;
+    sf->next            = NULL;
+    return sf;
+}
 
 typedef struct int_stack {
-  int num_frames;
-  stack_frame* top;
-} stack;
+    struct int_stack_frame* top;
+    int                     num_frames;
+    int                     capacity;
+} int_stack;
 
-int_stack_frame* new_frame(int data) {
-  int_stack_frame* sf = malloc(sizeof(stack_frame));
-  sf->data = data;
-  sf->next = NULL;
-  return sf;
+int_stack* new_int_stack(int capacity) {
+    int_stack* s  = malloc(sizeof(int_stack));
+    s->capacity   = capacity;
+    s->num_frames = 0;
+    s->top        = NULL;
+    return s;
 }
 
-int_stack* new_stack() {
-  int_stack* s = malloc(sizeof(stack));
-  s->num_frames = 0;
-  s->top = NULL;
-  return s;
-}
-
-void push(int_stack* s, int data) {
-  int_stack_frame* sf = new_frame(dat);
-  sf->next = s->top;
-  s->top = sf;
+int push(int_stack* s, int data) {
+    if (s->num_frames == s->capacity) {
+        return -1;
+    }
+    int_stack_frame* sf = new_int_stack_frame(data);
+    sf->next            = s->top;
+    s->top              = sf;
+    s->num_frames++;
+    return 0;
 }
 
 int pop(int_stack* s, int* buf) {
-  if(s->num_frames < 1) {
-    return -1
-  }
-
-  data = s->top->data;
-  s->top = s->top->next;
-  s->num_frames--;
-  *buf = data;
-  return 0;
+    if (s->num_frames == 0) {
+        return -1;
+    }
+    int_stack_frame* popped = s->top;
+    *buf                    = popped->data;
+    s->top                  = s->top->next;
+    s->num_frames--;
+    popped->next = NULL;
+    free(popped->next);
+    free(popped);
+    return 0;
 }
 
 ```

@@ -2,9 +2,14 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "⚙️  Run Java example",
+      "label": "☕ Run Java Example",
       "type": "shell",
       "command": "cd ${workspaceFolder}/java-interface-example && javac -d build Main.java && java -cp build Main"
+    },
+    {
+      "label": "⚙️  Run C Example",
+      "type": "shell",
+      "command": "cd ${workspaceFolder}/c-example && gcc main.c -o main && ./main && rm main"
     }
   ]
 }

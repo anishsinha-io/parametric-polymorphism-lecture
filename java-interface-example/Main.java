@@ -14,7 +14,6 @@
 // the other hand, the add implementation for a LinkedList needs to create a new node and link the
 // newly created node with the end of the list.
 
-//
 interface List {
   public void add(int data);
 
