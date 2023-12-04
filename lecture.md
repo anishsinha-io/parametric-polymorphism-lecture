@@ -199,3 +199,18 @@ struct stack {
 };
 
 ```
+
+This stack now has a _type parameter_ and we can specialize a stack with a _type_. For example, we can now do the following:
+
+```c++
+int main() {
+  stack<int> s1 = stack();
+  stack<float> s2 = stack();
+  stack<double> s3 = stack();
+  return 0;
+}
+```
+
+We do not need to duplicate code! And we also get the full advantages of type safety. The way this works under the hood, is that the C++ compiler, whenever it comes across a specific implementation (like `stack<int>`), will _generate_ an implementation for you. For example, when it comes across a `stack<int>` it will generate the necessary code for the stack to work with integers.
+
+This process (of generating specialized code) is called _monomorphization_.
